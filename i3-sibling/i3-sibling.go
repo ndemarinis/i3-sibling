@@ -6,7 +6,6 @@ import (
 	"os"
 
 	i3ipc "github.com/brunnre8/i3ipc-go"
-	"github.com/davecgh/go-spew/spew"
 )
 
 const (
@@ -15,9 +14,7 @@ const (
 )
 
 func main() {
-	spew.Config.MaxDepth = 2
-	spew.Config.Indent = "\n\t"
-
+	// Argument parsing
 	if len(os.Args) != 2 {
 		log.Fatalf("Usage:  %s <prev|next>\n", os.Args[0])
 	}
@@ -27,6 +24,7 @@ func main() {
 		log.Fatal("Expecting \"prev\" or \"next\" as argument")
 	}
 
+	// Get i3 socket and parse tree
 	ipcsocket, err := i3ipc.GetIPCSocket()
 
 	if err != nil {
@@ -38,6 +36,7 @@ func main() {
 		log.Fatal("Error fetching tree", err)
 	}
 
+	// Find the focused node and its siblings
 	focused := tree.FindFocused()
 	parent := focused.Parent
 
@@ -52,6 +51,7 @@ func main() {
 	siblings := parent.Nodes
 	numSiblings := len(siblings)
 
+	// Find our index into the siblings, then select the next/prev sibling
 	idx := 0
 	for idx = 0; idx < numSiblings; idx++ {
 		if focused.ID == siblings[idx].ID {
@@ -68,8 +68,6 @@ func main() {
 	}
 
 	targetNode := siblings[nextIdx]
-
-	log.Printf("Focusing node %x\n", targetNode.ID)
 
 	ok, err := ipcsocket.Command(fmt.Sprintf("[con_id=%v] focus", targetNode.ID))
 	if !ok {
