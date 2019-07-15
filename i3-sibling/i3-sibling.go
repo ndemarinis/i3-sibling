@@ -62,7 +62,10 @@ func main() {
 	var nextIdx int
 
 	if dir == DirPrev {
-		nextIdx = (idx - 1) % numSiblings
+		nextIdx = (idx - 1)
+		if nextIdx < 0 {
+			nextIdx += numSiblings
+		}
 	} else {
 		nextIdx = (idx + 1) % numSiblings
 	}
